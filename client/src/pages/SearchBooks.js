@@ -21,7 +21,7 @@ const SearchBooks = () => {
   // learn more here: https://reactjs.org/docs/hooks-effect.html#effects-with-cleanup
   useEffect(() => {
     return () => saveBookIds(savedBookIds);
-  });
+  }, [savedBookIds]);
 
   // create method to search for books and set state on form submit
   const handleFormSubmit = async (event) => {
@@ -70,11 +70,11 @@ const SearchBooks = () => {
     }
 
     try {
-      const response = await saveBook(bookToSave, token);
+      const { data } = await saveBook({
+        variables: { newBook: { ...bookToSave } },
+      });
 
-      if (!response.ok) {
-        throw new Error("something went wrong!");
-      }
+      console.log(data);
 
       // if book successfully saves to user's account, save book id to state
       setSavedBookIds([...savedBookIds, bookToSave.bookId]);
@@ -118,7 +118,6 @@ const SearchBooks = () => {
         </h2>
         <Row>
           {searchedBooks.map((book) => {
-            console.log(book);
             return (
               // <Col md="4">
               <Card key={book.bookId} border="dark">
@@ -133,6 +132,13 @@ const SearchBooks = () => {
                   <Card.Title>{book.title}</Card.Title>
                   <p className="small">Authors: {book.authors}</p>
                   <Card.Text>{book.description}</Card.Text>
+                  <Button
+                    className="btn btn-primary"
+                    onClick={() =>
+                      (window.location.href = `https://books.google.com/books?id=${book.bookId}`)
+                    }>
+                    Google Books!
+                  </Button>
                   {Auth.loggedIn() && (
                     <Button
                       disabled={savedBookIds?.some(
